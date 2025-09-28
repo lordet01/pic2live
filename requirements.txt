@@ -1,0 +1,11 @@
+opencv-python==4.10.0.84
+mediapipe==0.10.14
+numpy==1.26.4
+PyYAML==6.0.1
+pillow==10.4.0
+loguru==0.7.2
+psutil==6.0.0
+moderngl==5.8.2
+glfw==2.7.0
+pyrr==0.10.3
+

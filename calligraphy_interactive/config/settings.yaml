@@ -1,0 +1,33 @@
+mode: gl
+
+camera:
+  id: 0
+  width: 1280
+  height: 720
+  fps: 30
+
+images:
+  paths: ["D:/works/pic2live/calligraphy_interactive/assets/calligraphy.png"]  # 예: ["assets/calligraphy.png"]
+  cycle_seconds: 20
+
+effects:
+  gl:
+    window:
+      width: 1280
+      height: 720
+      fullscreen: false
+    ink:
+      strength_scale: 2.5
+      noise_amount: 0.6
+
+logging:
+  level: INFO
+
+debug:
+  enabled: true
+  draw_landmarks: true
+  draw_velocity: true
+  draw_text: true
+  show_fps: true
+
+
