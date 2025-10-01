@@ -7,7 +7,7 @@ camera:
   fps: 30
 
 images:
-  paths: ["D:/works/pic2live/calligraphy_interactive/assets/calligraphy.png"]  # 예: ["assets/calligraphy.png"]
+  paths: ["calligraphy_interactive/assets/calligraphy.png"]
   cycle_seconds: 20
 
 effects:
