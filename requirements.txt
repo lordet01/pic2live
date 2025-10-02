@@ -8,4 +8,5 @@ psutil==6.0.0
 moderngl==5.8.2
 glfw==2.7.0
 pyrr==0.10.3
+python-osc==1.8.3
 

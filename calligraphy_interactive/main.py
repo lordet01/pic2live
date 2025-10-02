@@ -49,7 +49,11 @@ def run_phase2_gl(settings: dict) -> None:
     base_image = load_or_generate_base_image(image_paths)
 
     camera = CameraStream(camera_id=camera_id, width=width, height=height, fps=fps)
-    tracker = GestureTracker()
+    
+    # 손 크기 설정 로드
+    gesture_cfg = settings.get('gesture', {})
+    hand_ref_size = float(gesture_cfg.get('hand_reference_size_cm', 18.0))
+    tracker = GestureTracker(hand_reference_size_cm=hand_ref_size)
 
     try:
         from .visualization.renderer import run_gl_ink_renderer

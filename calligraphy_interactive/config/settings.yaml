@@ -23,11 +23,20 @@ effects:
 logging:
   level: INFO
 
+osc:
+  enabled: true
+  host: "127.0.0.1"
+  port: 9000
+
 debug:
   enabled: true
   draw_landmarks: true
   draw_velocity: true
   draw_text: true
   show_fps: true
+  draw_thumb_index_line: true
+
+gesture:
+  hand_reference_size_cm: 18.0  # 손바닥 대각선 평균 크기 (cm)
 
 

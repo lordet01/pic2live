@@ -6,9 +6,10 @@ import cv2
 import glfw
 import moderngl
 
-from ..processing.motion_mapper import map_gesture_to_effect
+from ..processing.motion_mapper import map_gesture_to_effect, map_dual_gesture_to_effect
 from ..processing.shader_effect import INK_VERTEX_GLSL, INK_FRAGMENT_GLSL
 from .overlay import _draw_debug_overlay
+from ..utils.osc_sender import OSCSender
 
 
 def _create_fullscreen_quad(ctx: moderngl.Context):
@@ -97,6 +98,14 @@ def run_gl_ink_renderer(camera, tracker, base_image: np.ndarray, settings: Dict[
         strength_scale = float(settings.get('effects', {}).get('gl', {}).get('ink', {}).get('strength_scale', 1.5))
         noise_amt = float(settings.get('effects', {}).get('gl', {}).get('ink', {}).get('noise_amount', 0.45))
 
+        # OSC 송신 초기화
+        osc_cfg = settings.get('osc', {})
+        osc_sender = OSCSender(
+            host=osc_cfg.get('host', '127.0.0.1'),
+            port=int(osc_cfg.get('port', 9000)),
+            enabled=bool(osc_cfg.get('enabled', True))
+        )
+
         current_mode = 1
         effect_only = False
         # store original window position/size for restoring from fullscreen
@@ -118,16 +127,23 @@ def run_gl_ink_renderer(camera, tracker, base_image: np.ndarray, settings: Dict[
                 frame = base_image
 
             state = tracker.process(frame)
-            ctrl = map_gesture_to_effect(state.position_norm, state.velocity_norm, settings)
+            ctrl_left, ctrl_right = map_dual_gesture_to_effect(state, settings)
+            
+            # 주 손 (오른손 우선) 사용
+            ctrl = ctrl_right if state.right_hand.present else ctrl_left
             dx, dy = ctrl['direction']
             mag = ctrl['magnitude'] * strength_scale
+            
+            # OSC로 양손 제스처 데이터 전송
+            osc_sender.send_gesture_state(state, ctrl_left, ctrl_right)
+            osc_sender.send_custom('/effect/mode', current_mode)
 
             # resize base image to camera size and upload both textures
             fbw, fbh = frame.shape[1], frame.shape[0]
             base_img = cv2.resize(base_image, (fbw, fbh), interpolation=cv2.INTER_LINEAR)
             # annotate overlays only on left (camera) side; right/effect uses clean base image
             frame_anno = frame.copy()
-            _draw_debug_overlay(frame_anno, state, ctrl, settings)
+            _draw_debug_overlay(frame_anno, state, ctrl_left, ctrl_right, settings)
 
             frame_tex = _frame_to_texture(ctx, frame_anno)
             base_tex = _image_to_texture(ctx, base_img)
@@ -202,6 +218,7 @@ def run_gl_ink_renderer(camera, tracker, base_image: np.ndarray, settings: Dict[
                     effect_only = False
 
         # cleanup
+        osc_sender.close()
         glfw.destroy_window(window)
     finally:
         glfw.terminate()
